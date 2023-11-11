@@ -16,12 +16,21 @@ String rtc_time;
 String rtc_day;
 String pir_sensor;
 String header = "Test:";
+
+bool button_status = false;
  
 void setup()
 {
    // PIR sensor 
    pinMode(2, INPUT);
-   pinMode(3, OUTPUT);
+   pinMode(4, OUTPUT);
+
+   // BUTTON CONFIG
+   pinMode(3, INPUT_PULLUP);
+
+   attachInterrupt(digitalPinToInterrupt(3), button_press, FALLING);
+   attachInterrupt(digitalPinToInterrupt(2), pir_change, CHANGE);
+
   
    // Setup Serial connection
   Serial.begin(9600);
@@ -58,17 +67,17 @@ void setup()
  
 void loop()
 {
- 
+   
    // PIR SENSOR
-   bool value = digitalRead(2);
-   if (value == 1){
-      pir_sensor ="ON";
-      digitalWrite(3,HIGH);
+   //bool value = digitalRead(2);
+   //if (value == 1){
+   //   pir_sensor ="ON";
+   //   digitalWrite(4,HIGH);
      
-   } else{
-     pir_sensor = "OFF";
-     digitalWrite(3,LOW);
-   }
+   //} else{
+   //  pir_sensor = "OFF";
+   //  digitalWrite(4,LOW);
+   //}
 
   // Send Day-of-Week
   rtc_day = rtc.getDOWStr();
@@ -77,21 +86,42 @@ void loop()
   // Send date
   rtc_date = rtc.getDateStr();
   Serial.println(rtc_date);
-  
+
   // Send time
   rtc_time = rtc.getTimeStr();
   Serial.println(rtc_time);
-      
-  myFile = SD.open(date_file, FILE_WRITE);
-  if (myFile) {
-      String sd_save = rtc_day+","+rtc_date+","+rtc_time+","+pir_sensor;
-      Serial.println(sd_save);
-      myFile.println(sd_save);
-  }else{
-    // if the file didn't open, print an error:
-    Serial.println("error opening"+date_file);
+
+  String sd_save = rtc_day+","+rtc_date+","+rtc_time+","+pir_sensor;
+  Serial.println(sd_save);
+  
+  if(button_status == true){
+    myFile = SD.open(date_file, FILE_WRITE);
+    if (myFile) {
+       myFile.println(sd_save);
+        Serial.println("Saved...");
+    }else{
+      // if the file didn't open, print an error:
+      Serial.println("error opening"+date_file);
+    }
+    myFile.close();
   }
-  myFile.close();
   // Wait one second before repeating :)
   delay (1000);
+}
+
+// BUTTON LECTURE
+void button_press(){
+  button_status = true;
+}
+
+void pir_change(){
+   bool value = digitalRead(2);
+   if (value == 1){
+      pir_sensor ="ON";
+      digitalWrite(4,HIGH);
+     
+   } else{
+     pir_sensor = "OFF";
+     digitalWrite(4,LOW);
+   }
 }
