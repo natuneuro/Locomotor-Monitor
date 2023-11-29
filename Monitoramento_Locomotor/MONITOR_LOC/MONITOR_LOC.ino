@@ -45,18 +45,18 @@ void setup()
   if (set_date){
     // The following lines can be uncommented to set the date and time
     rtc.setDOW(THURSDAY);     // Set Day-of-Week
-    rtc.setTime(21, 22, 50);     // Set the time (24hr format)
-    rtc.setDate(5, 10, 2023);   // Set the date to the current day, month, year  
+    rtc.setTime(14, 15, 50);     // Set the time (24hr format)
+    rtc.setDate(10, 10, 2023);   // Set the date to the current day, month, year  
   }
 
   // SDCard Initialization
   Serial.print("Initializing SD card...");
 
   if (!SD.begin(10)) {
-    Serial.println("initialization failed!");
+    Serial.println(F("initialization failed!"));
     while (1);
   }
-  Serial.println("initialization done.");
+  Serial.println(F("initialization done."));
 
   date_file = rtc.getDateStr(FORMAT_LONG,FORMAT_LITTLEENDIAN,'-');
   date_file.remove(2,1);
@@ -69,6 +69,7 @@ void loop()
 {
    
    // PIR SENSOR
+<<<<<<< Updated upstream
    //bool value = digitalRead(2);
    //if (value == 1){
    //   pir_sensor ="ON";
@@ -78,6 +79,17 @@ void loop()
    //  pir_sensor = "OFF";
    //  digitalWrite(4,LOW);
    //}
+=======
+   bool value = digitalRead(2);
+   if (value == 1){
+      pir_sensor = int(1);
+      digitalWrite(3,HIGH);
+     
+   } else{
+     pir_sensor = int(0);
+     digitalWrite(3,LOW);
+   }
+
 
   // Send Day-of-Week
   rtc_day = rtc.getDOWStr();
