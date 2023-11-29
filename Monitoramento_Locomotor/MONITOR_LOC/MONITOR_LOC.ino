@@ -1,7 +1,11 @@
 #include <DS3231.h>
 #include <SPI.h>
 #include <SD.h>
+#include <millisDelay.h>
 
+const unsigned long TASK_TIME = 1000; // in ms
+millisDelay taskDelay; // the delay object
+ 
 // Init the DS3231 using the hardware interface
 DS3231  rtc(SDA, SCL);
  
@@ -38,6 +42,9 @@ void setup()
     ; // wait for serial port to connect. Needed for native USB port only
   }
 
+  // Initialize Timer Delay
+  taskDelay.start(TASK_TIME);
+  
   // Initialize the rtc object
   rtc.begin();
 
@@ -67,46 +74,36 @@ void setup()
  
 void loop()
 {
-   
-   // PIR SENSOR
-   //bool value = digitalRead(2);
-   //if (value == 1){
-   //   pir_sensor ="ON";
-   //   digitalWrite(4,HIGH);
-     
-   //} else{
-   //  pir_sensor = "OFF";
-   //  digitalWrite(4,LOW);
-   //}
-
-  // Send Day-of-Week
-  rtc_day = rtc.getDOWStr();
-  Serial.println(rtc_day);
+  // Verify if task time run
+  if (taskDelay.justFinished()){
+    taskDelay.repeat(); // repeat without drift 
+    // Send Day-of-Week
+    rtc_day = rtc.getDOWStr();
+    Serial.println(rtc_day);
+    
+    // Send date
+    rtc_date = rtc.getDateStr();
+    Serial.println(rtc_date);
   
-  // Send date
-  rtc_date = rtc.getDateStr();
-  Serial.println(rtc_date);
-
-  // Send time
-  rtc_time = rtc.getTimeStr();
-  Serial.println(rtc_time);
-
-  String sd_save = rtc_day+","+rtc_date+","+rtc_time+","+pir_sensor;
-  Serial.println(sd_save);
+    // Send time
+    rtc_time = rtc.getTimeStr();
+    Serial.println(rtc_time);
   
-  if(button_status == true){
-    myFile = SD.open(date_file, FILE_WRITE);
-    if (myFile) {
-       myFile.println(sd_save);
-        Serial.println("Saved...");
-    }else{
-      // if the file didn't open, print an error:
-      Serial.println("error opening"+date_file);
+    String sd_save = rtc_day+","+rtc_date+","+rtc_time+","+pir_sensor;
+    Serial.println(sd_save);
+    
+    if(button_status == true){
+      myFile = SD.open(date_file, FILE_WRITE);
+      if (myFile) {
+         myFile.println(sd_save);
+          Serial.println("Saved...");
+      }else{
+        // if the file didn't open, print an error:
+        Serial.println("error opening"+date_file);
+      }
+      myFile.close();
     }
-    myFile.close();
   }
-  // Wait one second before repeating :)
-  delay (1000);
 }
 
 // BUTTON LECTURE
