@@ -114,11 +114,11 @@ void button_press(){
 void pir_change(){
    bool value = digitalRead(2);
    if (value == 1){
-      pir_sensor ="ON";
+      pir_sensor = int(1);
       digitalWrite(4,HIGH);
      
    } else{
-     pir_sensor = "OFF";
+     pir_sensor = int(0);
      digitalWrite(4,LOW);
    }
 }
